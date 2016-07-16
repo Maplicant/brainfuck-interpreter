@@ -11,6 +11,8 @@ struct Tape {
     tape: Vec<u8>
 }
 
+
+//TODO: Split Tape up
 impl Tape {
     fn new() -> Tape {
         Tape {
@@ -44,11 +46,12 @@ impl Tape {
         self.tape[self.pointer] as u8 as char
     }
 
+    //TODO: This shouldn't be in here...
     fn run(&mut self, str_code: String) {
         let mut code: Vec<char> = Vec::new();
         let mut jump_map: BTreeMap<usize, usize> = BTreeMap::new();
         let mut jump_stack: Vec<usize> = Vec::new();
-        let mut pc: usize = 0;
+        let mut pc: usize = 0; // Program counter, stores current instruction index
         // Preprocessing, creating the jump map and a vector of the code
         for ch in str_code.chars() {
             match ch {
@@ -66,34 +69,42 @@ impl Tape {
         }
         println!("Created jump_map: {:#?}", jump_map);
         // The actual execution
-        let mut pc = 0;
-        for ch in code {
-            println!("Matching {}", ch);
+        pc = 0;
+        let mut ch: char;
+        loop {
+            ch = code[pc];
+            // println!("Matching {}", ch);
             match ch {
                 '>' => self.advance(),
                 '<' => self.devance(),
                 '+' => self.inc(),
                 '-' => self.dec(),
                 '.' => {
-                    println!("{}", self.get());
+                    print!("{}", self.getchar()); //TODO: print character
                     // print!("{}", self.getchar());
                     stdout().flush();
                 },
                 '[' => {
+                    // println!("Began loop, {}", self.get());
                     if self.get() == 0 {
-                        self.pointer = jump_map.get(&self.pointer).unwrap().clone();
+                        pc = jump_map.get(&pc).unwrap().clone();
                     }
                 },
                 ']' => {
-                    println!("End of loop, got {}", self.get());
+                    // println!("End of loop, got {}", self.get());
                     if self.get() != 0 {
-                        self.pointer = jump_map.get(&self.pointer).unwrap().clone();
+                        // println!("PC before: {}", pc);
+                        pc = jump_map.get(&pc).unwrap().clone();
+                        // println!("PC after: {}", pc);
                     }
                 }
                 _ => ()
             }
             pc += 1;
-            println!("{:#?}", self.tape);
+            // println!("{:#?}", self.tape);
+            if pc >= code.len() {
+                break;
+            }
         }
     }
 }
