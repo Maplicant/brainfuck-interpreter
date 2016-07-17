@@ -94,7 +94,7 @@ impl VM {
             match ch {
                 '[' => jump_stack.push(ppc),
                 ']' => {
-                    let open = jump_stack.pop().expect("Brainfuck code is invalid ([ and ] are not equal)");
+                    let open = jump_stack.pop().expect("Brainfuck loops aren't valid.");
                     self.jump_map.insert(open, ppc);
                     self.jump_map.insert(ppc, open);
                 },
@@ -107,8 +107,8 @@ impl VM {
 }
 
 fn main() {
-    let path = args().nth(1).expect("Didn't get argument.");
-    let mut file = File::open(path).expect("Couldn't open file.");
+    let path = args().nth(1).expect("Didn't get path argument.");
+    let mut file = File::open(path).expect("Couldn't open file '{}'", path);
     let mut code: String = String::new();
     file.read_to_string(&mut code);
     VM::new().run(code);
